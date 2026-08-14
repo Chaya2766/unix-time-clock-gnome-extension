@@ -9,6 +9,7 @@ let timeoutId;
 let display_unix_time = true;
 let display_day_second = true;
 let display_day_count = false;
+let display_year_count = false;
 
 export default class UnixTimeExtension {
   enable() {
@@ -54,6 +55,14 @@ export default class UnixTimeExtension {
       label.text = this._getTimeString();
     });
     menu.addMenuItem(dayCountItem);
+    
+    // Add the year count toggle menu item
+    const yearCountItem = new PopupMenu.PopupSwitchMenuItem('Year count', display_year_count);
+    yearCountItem.connect('toggled', (item) => {
+      display_year_count = item.state;
+      label.text = this._getTimeString();
+    });
+    menu.addMenuItem(yearCountItem);
 
     // Toggle menu visibility when the extension is clicked
     button.connect('button-press-event', () => {
@@ -78,21 +87,19 @@ export default class UnixTimeExtension {
 
   _getTimeString() {
     const now = Math.floor(Date.now() / 1000); // Unix timestamp
-    const epoch_date = now.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-    
-    const secondsSinceMidnight = now % 86400;
-    const epoch_clock = secondsSinceMidnight.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-    
-    const daysSinceEpoch = Math.floor(now/86400);
-    const epoch_day = "day "+daysSinceEpoch.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
     
     let displaytext = "";
     let needs_divider = false;
     
+    
+    const epoch_date = now.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
     if(display_unix_time){
         displaytext += epoch_date;
         needs_divider = true;
     }
+    
+    const secondsSinceMidnight = now % 86400;
+    const epoch_clock = secondsSinceMidnight.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
     if(display_day_second){
         if(needs_divider){
             displaytext += " | ";
@@ -100,6 +107,9 @@ export default class UnixTimeExtension {
         displaytext += epoch_clock;
         needs_divider = true;
     }
+    
+    const daysSinceEpoch = Math.floor(now/86400);
+    const epoch_day = "day "+daysSinceEpoch.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
     if(display_day_count){
         if(needs_divider){
             displaytext += " | ";
@@ -107,6 +117,18 @@ export default class UnixTimeExtension {
         displaytext += epoch_day;
         needs_divider = true;
     }
+    
+    const leapYearsSinceEpoch = Math.floor(daysSinceEpoch/1461);//4 * 365 + 1 days = 3 standard years + 1 leap year = number of leap years since epoch = number of leap days since epoch
+    const yearsSinceEpoch = Math.floor( (daysSinceEpoch - leapYearsSinceEpoch) / 365); //assume a year means 365 days, substract one day every 4 years to account for leap years
+    const epoch_year = "year "+yearsSinceEpoch.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    if(display_year_count){
+        if(needs_divider){
+            displaytext += " | ";
+        }
+        displaytext += epoch_year;
+        needs_divider = true;
+    }
+    
     
     return displaytext;
   }
