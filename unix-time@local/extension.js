@@ -118,8 +118,10 @@ export default class UnixTimeExtension {
         needs_divider = true;
     }
     
-    const leapYearsSinceEpoch = Math.floor(daysSinceEpoch/1461);//4 * 365 + 1 days = 3 standard years + 1 leap year = number of leap years since epoch = number of leap days since epoch
-    const yearsSinceEpoch = Math.floor( (daysSinceEpoch - leapYearsSinceEpoch) / 365); //assume a year means 365 days, substract one day every 4 years to account for leap years
+    const leapYearsSinceEpoch = Math.floor((daysSinceEpoch+731)/1461);//4 * 365 + 1 days = 3 standard years + 1 leap year = number of leap years since epoch = number of leap days since epoch. This falsely includes years that according to further rules should NOT be leap years, eg. year 2100, since it is divisible by 100 but not 400
+    //Adding 731 is to shift it forward by 2 years, since 1972 is a leap year, and the count starts at 1970, so without the shift the equation would count 1972 as a normal year and then 1974 as a leap year
+    const leaplessYearsSinceEpoch = Math.floor((daysSinceEpoch-10957)/36525) - Math.floor((daysSinceEpoch-10957)/146100) + 1;//10957 is number of days between 1 jan 1970 and 1 jan 2000, 36525 is number of days in each century including leap days, 146100 is number of days in 4 centuries including leap days, the substraction means this counts how many years there had been since 2000 that were divisible by 100 but not 400, and +1 to account for 2000 which the count starts from
+    const yearsSinceEpoch = Math.floor( (daysSinceEpoch - leapYearsSinceEpoch + leaplessYearsSinceEpoch) / 365); //assume a year means 365 days, substract one day every leap year
     const epoch_year = "year "+yearsSinceEpoch.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
     if(display_year_count){
         if(needs_divider){
