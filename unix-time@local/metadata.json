@@ -2,6 +2,6 @@
   "uuid": "unix-time@local",
   "name": "Unix Time Display",
   "description": "Shows current Unix timestamp and several related things",
-  "version": 3,
+  "version": 4,
   "shell-version": ["46", "48"]
 }
