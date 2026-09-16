@@ -3,5 +3,5 @@
   "name": "Unix Time Display",
   "description": "Shows current Unix timestamp and several related things",
   "version": 4,
-  "shell-version": ["46", "48"]
+  "shell-version": ["46", "48", "50"]
 }
